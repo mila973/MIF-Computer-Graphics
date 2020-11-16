@@ -60,6 +60,110 @@ const draw = step => {
   }
 }
 
+const animateF1 = () => {
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'red';
+
+  var xCoord = 0;
+  var yCoord = 0;
+
+  const transform = i => {
+    ctx.clearRect(0, 0, 500, 500);
+    ctx.save();
+
+    var vector = 1 - 0.5 * i;
+
+    ctx.transform(vector, 0, 0, vector, xCoord, yCoord);
+    drawT(ctx);
+    ctx.restore();
+
+    xCoord = xCoord + 25;
+  };
+
+  executeTransformation(transform);
+}
+
+const animateF2 = () => {
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'green';
+
+  var xCoord = 0;
+  var yCoord = 0;
+
+  const transform = i => {
+    ctx.clearRect(0, 0, 500, 500);
+    ctx.save();
+
+    var vector1 = 1 - 1.5 * i;
+    var vector2 = 1 - 0.5 * i;
+
+    ctx.transform(vector1, 0, 0, vector2, xCoord, yCoord);
+    drawT(ctx);
+    ctx.restore();
+
+    xCoord = xCoord + 50;
+    yCoord = yCoord + 25;
+  };
+
+  executeTransformation(transform);
+}
+
+const animateF3 = () => {
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'blue';
+
+  var xCoord = 0;
+  var yCoord = 0;
+
+  const transform = i => {
+    ctx.clearRect(0, 0, 500, 500);
+    ctx.save();
+
+    var vector = 1 - 0.5 * i;
+    var alpha = Math.PI * i;
+    
+    ctx.transform(vector * Math.cos(alpha), vector * Math.sin(alpha), vector * (-Math.sin(alpha)), vector * Math.cos(alpha), xCoord, yCoord);
+    drawT(ctx);
+    ctx.restore();
+
+    xCoord = xCoord + 25;
+    yCoord = yCoord + 50;
+  };
+
+  executeTransformation(transform);
+}
+
+const animateF4 = () => {
+  var canvas = document.getElementById('canvas');
+  var ctx = canvas.getContext('2d');
+  ctx.fillStyle = 'black';
+
+  var coordinateStart = 0;
+
+  const transform = i => {
+    ctx.clearRect(0, 0, 500, 500);
+    ctx.save();
+
+    var vector1 = 0.25 * i;
+    var vector2 = 1 - i;
+
+    ctx.transform(vector2, vector1, vector1, vector2, coordinateStart, coordinateStart);
+    drawT(ctx);
+    ctx.restore();
+
+    coordinateStart = coordinateStart + 12.5;
+  };
+
+  executeTransformation(transform);
+}
+
+const executeTransformation = callback => {
+  [...Array(10)].forEach((_, i) => setTimeout(() => { callback((i + 1) / 10) }, i * 100));
+} 
+
 const drawT = ctx => {
   ctx.beginPath();
   ctx.moveTo(100, 0);

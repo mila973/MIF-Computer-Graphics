@@ -1,12 +1,20 @@
 <html>
  <head>
- <input type="range" min="0" max="6" value="0" step="1" onchange="showValue(this.value)" />
- <span id="range">0</span>
- <script src="index.js"></script>
+    <input type="range" min="0" max="6" value="0" step="1" onchange="showValue(this.value)" />
+    <span id="range">0</span>
+    <script src="index.js"></script>
  </head>
  <body onload="draw();">
-
-  <h1>1st assignment</h1>
-   <canvas id="canvas" width="500" height="500"></canvas>
+    <div>
+      <h1>1st assignment</h1>
+      <canvas id="canvas" width="500" height="500"></canvas>
+    </div>
+    <h2>Animavimas</h2>
+    <div>
+        <button onclick="animateF1()">F1</button>
+        <button onclick="animateF2()">F2</button>
+        <button onclick="animateF3()">F3</button>
+        <button onclick="animateF4()">F4</button>
+    </div>
  </body>
 </html>
