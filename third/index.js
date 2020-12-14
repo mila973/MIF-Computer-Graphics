@@ -131,6 +131,17 @@ $(function () {
       var u3 = ((Math.atan2(verticeZ.x, verticeZ.z)) / twoPI);
       var v3 = ((2 * verticeZ.y + height) / (2 * height));
       
+      if (Math.max(u1, u2, u3) - Math.min(u1, u2, u3) > 0.7) {
+        switch (Math.max(u1, u2, u3)) {
+          case u1:
+            u1 = Math.abs(u1) - 1;
+          case u2:
+            u2 = Math.abs(u2) - 1;
+          default:
+            u3 = Math.abs(u3) - 1;
+        }
+      }
+
       uvPoints.push(new THREE.Vector2(u1, v1));
       uvPoints.push(new THREE.Vector2(u2, v2));
       uvPoints.push(new THREE.Vector2(u3, v3));
@@ -149,7 +160,6 @@ $(function () {
     stats.update();
 
     spGroup.rotation.y = step;
-    hullMesh.rotation.y = step += 0.005;
     camControl.update();
 
     requestAnimationFrame(render);
