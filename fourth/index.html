@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+
+<head>
+  <title>Teapot Texture</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script src="../libs/jquery-1.9.0.js"></script>
+  <script type="text/javascript" src="../libs/stats.js"></script>
+  <script src="../libs/three.js"></script>
+  <script src="../libs/dat.gui.js"></script>
+  <script src="../libs/TrackballControls.js"></script>
+
+  <script src="./TeapotBufferGeometry.js"></script>
+  <script src="./index.js"></script>
+
+  <style>
+    body {
+      /* set margin to 0 and overflow to hidden, to go fullscreen */
+      margin: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <!--procedural texture shaders-->
+  <script id="vertexShader" type="x-shader/x-vertex">
+        precision mediump float; 
+
+        varying vec3 vecNormal; 
+        varying vec2 vUv;
+        void main() {
+            vecNormal = normalMatrix * normal;
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+        }
+  </script>
+  <script id="fragmentShader" type="x-shader/x-vertex">
+    # extension GL_OES_standard_derivatives : enable
+    # define M_PI 3.1415926535897932384626433832795
+    precision mediump float;	
+    
+    uniform vec3 color1;
+    uniform vec3 color2;
+    uniform float uScale;
+    uniform float uEdge;
+    varying vec2 vUv;
+
+    float pointAbs(float val){
+      if(val > 0.0){
+        return val;
+      }
+      return -val;
+    }
+  
+    void main() {
+  
+    // uv coordinates
+      float u = fract(vUv.x * uScale);
+      float v = fract(vUv.y * uScale);
+      
+      // float f = (u-0.5)*(u-0.5) + (v-0.5)*(v-0.5) - 0.3;
+      // float f = u+v - 1.0;
+      float f = -1.0;
+      if (
+        u <= 0.05 ||
+        v <= 0.05 ||
+        (u + v <= 0.4) ||
+        (u - v >= 0.65) ||
+        (-u + v >= 0.65) ||
+        (u + v >= 1.7)
+      ) {
+        f = 1.0;
+      }
+      float grad = length(vec2(dFdx(f),dFdy(f))); 
+      float d = uEdge*grad;
+      float edgeFactor = smoothstep(-d, d, f);
+    
+    // final color
+      vec3 finalColor = mix(color1,color2,edgeFactor);
+      gl_FragColor = vec4(finalColor, 1.0);
+    }
+  
+  </script>
+
+  <div id="WebGL-output">
+  </div>
+</body>
+
+</html>
