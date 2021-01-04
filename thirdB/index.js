@@ -37,15 +37,16 @@ $(function () {
   var dollyControls = new THREE.TrackballControls(dollyCamera, webGLRenderer.domElement);
   var dollyHelper = new THREE.CameraHelper(dollyCamera);
   dollyHelper.visible = props.wireframeVisible;
-  console.log(dollyHelper);
   scene.add(dollyHelper);
+
+  var cameraEye;
 
   const gui = new dat.GUI();
   const controlFunctions = {
     moveQueen: () => moveFigure(6)
   }
 
-  gui.add(controlFunctions, 'moveQueen').name('Move moveQueen');
+  gui.add(controlFunctions, 'moveQueen').name('Move Queen');
   gui.add(props, 'cameraNumber', 1, 3)
     .step(1)
     .name('Camera')
@@ -142,6 +143,7 @@ $(function () {
     const eyeCylinder = new THREE.Mesh(eyeGeometry, eyeMaterial);
     eyeCylinder.position.x = -2.15;
     eyeCylinder.rotation.z = 0.5 * Math.PI;
+    cameraEye = eyeCylinder;
 
     cameraObject.add(firstCylinder, secondCylinder, box, thirdCylinder, eyeCylinder);
     cameraObject.rotation.z = 0.5 * Math.PI;
@@ -163,9 +165,9 @@ $(function () {
   }
 
   function initDollyZoomCamera() {
-    dollyCamera.position.x = 0;
-    dollyCamera.position.y = 15;
-    dollyCamera.position.z = -70;
+    dollyCamera.position.x = cameraEye.getWorldPosition().x;
+    dollyCamera.position.y = cameraEye.getWorldPosition().y;
+    dollyCamera.position.z = cameraEye.getWorldPosition().z;
     dollyControls.target = new THREE.Vector3(nonMovingFigureStartX, 0, nonMovingFigureStartZ);
   }
 

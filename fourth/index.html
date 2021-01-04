@@ -34,17 +34,18 @@ and open the template in the editor.
   <script id="vertexShader" type="x-shader/x-vertex">
         precision mediump float; 
 
-        varying vec3 vecNormal; 
+        varying vec3 vPosition;
+        varying vec3 vNormal; 
         varying vec2 vUv;
         void main() {
-            vecNormal = normalMatrix * normal;
+            vNormal = normalMatrix * normal;
+            vPosition = position;
             vUv = uv;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
         }
   </script>
   <script id="fragmentShader" type="x-shader/x-vertex">
     # extension GL_OES_standard_derivatives : enable
-    # define M_PI 3.1415926535897932384626433832795
     precision mediump float;	
     
     uniform vec3 color1;
@@ -52,6 +53,8 @@ and open the template in the editor.
     uniform float uScale;
     uniform float uEdge;
     varying vec2 vUv;
+    varying vec3 vNormal; 
+    uniform float dx, dy, dz;
 
     float pointAbs(float val){
       if(val > 0.0){
@@ -61,13 +64,14 @@ and open the template in the editor.
     }
   
     void main() {
-  
+      // light intensity
+      vec3 lightDir = normalize(vec3(dx,dy,dz)); 
+      float intensity = dot(lightDir,normalize(vNormal));
+
     // uv coordinates
       float u = fract(vUv.x * uScale);
       float v = fract(vUv.y * uScale);
       
-      // float f = (u-0.5)*(u-0.5) + (v-0.5)*(v-0.5) - 0.3;
-      // float f = u+v - 1.0;
       float f = -1.0;
       if (
         u <= 0.05 ||
@@ -85,10 +89,43 @@ and open the template in the editor.
     
     // final color
       vec3 finalColor = mix(color1,color2,edgeFactor);
-      gl_FragColor = vec4(finalColor, 1.0);
+      gl_FragColor = vec4(finalColor, 1.0) * intensity;
     }
   
   </script>
+
+  <script type="x-shader/x-vertex" id="teapotVertex">
+
+    precision mediump float;
+  
+    varying vec3 vPosition; 
+    varying vec3 vNormal; 
+    varying vec2 vUv;
+    uniform float dx, dy, dz;
+    
+    void main(void) {
+      vUv = uv;
+      vNormal = normalMatrix * normal;
+      vPosition = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0 );         
+    }
+      </script>
+
+  <script type="x-shader/x-vertex" id="teapotShader">
+    precision mediump float;	
+  
+    varying vec3 vPosition; 
+    varying vec3 vNormal; 
+    varying vec2 vUv;
+    uniform float dx, dy, dz;
+    
+    void main() {
+      vec3 lightDir = normalize(vec3(dx,dy,dz)); 
+      float intensity = dot(lightDir,normalize(vNormal));
+        vec3 color = vec3(intensity);
+      gl_FragColor = vec4(color,1.0);   
+    }
+    </script>
 
   <div id="WebGL-output">
   </div>

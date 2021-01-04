@@ -21,30 +21,11 @@ $(function () {
   var ambientLight = new THREE.AmbientLight(0x404040); // soft white light
   ambientLight.position.set(100, 50, 100);
   scene.add(ambientLight);
-  var dLight = new THREE.DirectionalLight(0xFFFFFF, 1.0);
-  scene.add(dLight);
 
-  effectController = {
-
-    shininess: 40.0,
-    ka: 0.17,
-    kd: 0.51,
-    ks: 0.2,
-    metallic: true,
-
-    hue: 0.121,
-    saturation: 0.73,
-    lightness: 0.66,
-
-    lhue: 0.04,
-    lsaturation: 0.01,	// non-zero so that fractions will be shown
-    llightness: 1.0,
-
-    // bizarrely, if you initialize these with negative numbers, the sliders
-    // will not show any decimal places.
-    lx: 0.32,
-    ly: 0.39,
-    lz: 0.7,
+  const props = {
+    x: 0.32,
+    y: 0.39,
+    z: 0.7,
     newTess: 15,
     bottom: true,
     lid: true,
@@ -52,28 +33,23 @@ $(function () {
     fitLid: true,
     nonblinn: false,
     newShading: "glossy",
-
-    scale: 13.0
-
-
-  };
-
-  const props = {}
+    scale: 13.0,
+    edge: 0.0
+  }
 
   const gui = new dat.GUI();
 
-  // light (directional)
-
   h = gui.addFolder("Light direction");
-
-  h.add(effectController, "lx", -1.0, 1.0, 0.025).name("x").onChange(update);
-  h.add(effectController, "ly", -1.0, 1.0, 0.025).name("y").onChange(update);
-  h.add(effectController, "lz", -1.0, 1.0, 0.025).name("z").onChange(update);
-
-  gui.add(effectController, "scale", 0, 104, 13).name("scale").onChange(update);
+  h.add(props, "x", -1.0, 1.0, 0.025).name("x").onChange(update);
+  h.add(props, "y", -1.0, 1.0, 0.025).name("y").onChange(update);
+  h.add(props, "z", -1.0, 1.0, 0.025).name("z").onChange(update);
+  gui.add(props, "scale", 0, 104, 13).name("scale").onChange(update);
+  gui.add(props, "edge", 0, 1000, 1).name("edge").onChange(update);
 
   var tilingMaterial = new THREE.ShaderMaterial({
-    uniforms: {
+    uniforms: THREE.UniformsUtils.merge([
+      THREE.UniformsLib['lights'],
+      {
         "color1": {
           type: "c",
           value: new THREE.Color(0xFFFF1A)
@@ -82,25 +58,37 @@ $(function () {
           type: "c",
           value: new THREE.Color(0x1A1AFF)
         },
-      uScale: { type: 'f', value: 10.0 },
-      uEdge: { type: 'f', value: 0.0 }
-    },
+        uScale: { type: 'f', value: 10.0 },
+        uEdge: { type: 'f', value: 0.0 },
+        dx: { type: 'f', value: 0.0 },
+        dy: { type: 'f', value: 0.0 },
+        dz: { type: 'f', value: 1.0 }
+      }
+    ]),
     vertexShader: document.getElementById('vertexShader').textContent,
-    fragmentShader: document.getElementById('fragmentShader').textContent
+    fragmentShader: document.getElementById('fragmentShader').textContent,
+    lights: true
   });
 
-  var materialColor = new THREE.MeshPhongMaterial({ color: 0xffffFF, wireframe: false, polygonOffset: true });
+  var materialColor = new THREE.ShaderMaterial({
+    uniforms: {
+      dx: { type: 'f', value: 0.0 },
+      dy: { type: 'f', value: 0.0 },
+      dz: { type: 'f', value: 1.0 }
+    },
+    vertexShader: document.getElementById('teapotVertex').textContent,
+    fragmentShader: document.getElementById('teapotShader').textContent
+  });
 
   var teapotSize = 50;
   var teapotBufferGeometry = new TeapotBufferGeometry(teapotSize,
-    effectController.newTess,
-    effectController.bottom,
-    effectController.lid,
-    effectController.body,
-    effectController.fitLid,
-    !effectController.nonblinn);
+    props.newTess,
+    props.bottom,
+    props.lid,
+    props.body,
+    props.fitLid,
+    !props.nonblinn);
   var teapotGeometry = new THREE.Geometry().fromBufferGeometry(teapotBufferGeometry);
-  console.log(teapotGeometry);
   teapot = new THREE.Mesh(teapotGeometry, [materialColor, tilingMaterial]);
   scene.add(teapot);
 
@@ -119,26 +107,22 @@ $(function () {
     if (low.y > stripStart && high.y < stripStart + stripSize) {
       if (low.distanceTo(stripMeasurePoint) < teapotSize + 10) {
         face.materialIndex = 1;
-        //face remap
-        // teapotGeometry.faceVertexUvs[0][f] = [new THREE.Vector2(1, 1), new THREE.Vector2(0, 1), new THREE.Vector2(0, 0)];
       }
     }
   }
   teapotGeometry.uvsNeedUpdate = true;
 
-
-
-
   render();
 
   function update() {
-
-
-    // orbitFree.target.set(walker.position.x, walker.position.y, walker.position.z);
-
-    dLight.position.set(effectController.lx, effectController.ly, effectController.lz);
-    // dLight.color.setHSL(effectController.lhue, effectController.lsaturation, effectController.llightness);
-    tilingMaterial.uniforms.uScale.value = effectController.scale;
+    materialColor.uniforms.dx.value = props.x; 
+    materialColor.uniforms.dy.value = props.y; 
+    materialColor.uniforms.dz.value = props.z;
+    tilingMaterial.uniforms.uEdge.value = props.edge;
+    tilingMaterial.uniforms.dx.value = props.x; 
+    tilingMaterial.uniforms.dy.value = props.y; 
+    tilingMaterial.uniforms.dz.value = props.z;
+    tilingMaterial.uniforms.uScale.value = props.scale;
   }
 
   function render() {
